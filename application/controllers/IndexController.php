@@ -31,6 +31,7 @@ class IndexController extends Controller
             $filter = $this->getParam($key);
             if (isset($filter)) {
                 $_filters[] = "$name ( $filter ) ";
+                $this->view->enableBack = true;
             } else if (!isset($this->currentVirtualGroupKey)) {
                 $this->currentVirtualGroupKey = $key;
             } else if (!isset($this->nextVirtualGroupKey)) {

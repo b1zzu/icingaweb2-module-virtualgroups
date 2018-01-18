@@ -5,6 +5,12 @@ use Icinga\Module\Monitoring\Web\Widget\StateBadges;
 if (!$this->compact): ?>
     <div class="controls">
         <?= $this->tabs ?>
+        <?php if ($this->enableBack): ?>
+            <div class="action-bar" style="display: inline-block">
+                <a href="#" onclick="window.history.back();" title="Go back" class="icon-left-big"
+                   data-base-target="_main">back</a>
+            </div>
+        <?php endif ?>
         <?= $this->paginator ?>
         <div class="sort-controls-container">
             <?= $this->limiter ?>
