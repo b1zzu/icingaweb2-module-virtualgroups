@@ -3,17 +3,18 @@
 namespace Icinga\Module\Virtualgroups\Controllers;
 
 use Icinga\Application\Config;
+use Icinga\Web\Form;
 use Icinga\Web\Url;
+use Icinga\Web\Widget\Tabextension\DashboardAction;
+use Icinga\Web\Widget\Tabextension\MenuAction;
+use Icinga\Web\Widget\Tabextension\OutputFormat;
 use Icinga\Module\Monitoring\Controller;
 use Icinga\Module\Monitoring\DataView\DataView;
-use Icinga\Module\Virtualgroups\Backend\Ido\Query\VirtualgroupsummaryQuery;
 use Icinga\Module\Virtualgroups\DataView\Virtualgroupsummary;
 
 class IndexController extends Controller
 {
     private $virtualGroups = array();
-
-    private $currentVirtualGroupName;
 
     private $currentVirtualGroupKey;
 
@@ -21,25 +22,29 @@ class IndexController extends Controller
 
     public function indexAction()
     {
-        $this->virtualGroups = Config::module('virtualgroups')->getSection('groups')->toArray();
+        $this->createTabs();
 
-        $title = array();
+        $this->loadVirtualGroups();
+
+        $_filters = array();
         foreach ($this->virtualGroups as $key => $name) {
             $filter = $this->getParam($key);
             if (isset($filter)) {
-                $title[] = $filter;
-            } else if (!isset($this->currentVirtualGroupName)) {
-                $title[] = $name;
-                $this->currentVirtualGroupName = $name;
+                $_filters[] = "$name ( $filter ) ";
+            } else if (!isset($this->currentVirtualGroupKey)) {
                 $this->currentVirtualGroupKey = $key;
             } else if (!isset($this->nextVirtualGroupKey)) {
                 $this->nextVirtualGroupKey = $key;
             }
         }
 
+        $this->setupGroupControl();
+
+        $title = sprintf("%s# %s", join("& ", $_filters), $this->virtualGroups[$this->currentVirtualGroupKey]);
+
         $this->addTitleTab(
             'hostgroups',
-            join(" > ", $title),
+            $title,
             $this->translate('List host groups')
         );
 
@@ -88,6 +93,54 @@ class IndexController extends Controller
     }
 
     /**
+     * Add extended tabs for controller
+     */
+    private function createTabs()
+    {
+        $this->getTabs()->extend(new OutputFormat())->extend(new DashboardAction())->extend(new MenuAction());
+    }
+
+    /**
+     *  Load virtual groups list from config file
+     */
+    protected function loadVirtualGroups()
+    {
+        $this->virtualGroups = Config::module('virtualgroups')->getSection('groups')->toArray();
+    }
+
+    /**
+     * Create the group dropdown for the view
+     *
+     * @throws \Zend_Form_Exception
+     */
+    protected function setupGroupControl()
+    {
+        $this->currentVirtualGroupKey = $this->getParam("group", $this->currentVirtualGroupKey);
+
+        $groupForm = new Form();
+        $groupForm->setTokenDisabled();
+        $groupForm->setUidDisabled();
+        $groupForm->setAttrib('class', 'inline');
+        $groupForm->setMethod("GET");
+        $groupForm->addElement(
+            'select',
+            'group',
+            array(
+                'autosubmit'   => true,
+                'label'        => 'Group by',
+                'multiOptions' => $this->virtualGroups,
+                'decorators'   => array(
+                    array('ViewHelper'),
+                    array('Label')
+                )
+            )
+        );
+        $groupForm->populate(array('group' => $this->currentVirtualGroupKey));
+
+        $this->view->groupControl = $groupForm;
+    }
+
+    /**
      * Add tab to the page
      *
      * @param String $action
@@ -119,9 +172,11 @@ class IndexController extends Controller
             'format', // handleFormatRequest()
             'stateType', // hostsAction() and servicesAction()
             'addColumns', // addColumns()
-            'problems' // servicegridAction()
+            'problems', // servicegridAction()
+            'group',
         ));
         $this->handleFormatRequest($dataView);
         return $dataView;
     }
+
 }
