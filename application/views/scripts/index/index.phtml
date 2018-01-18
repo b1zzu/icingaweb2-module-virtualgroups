@@ -8,8 +8,10 @@ if (!$this->compact): ?>
         <?= $this->paginator ?>
         <div class="sort-controls-container">
             <?= $this->limiter ?>
+            <div class="group-control"><?= $this->groupControl ?></div>
             <?= $this->sortBox ?>
         </div>
+        <?= $this->filterEditor ?>
     </div>
 <?php endif ?>
 
@@ -23,8 +25,8 @@ endif ?>
 <table class="common-table table-row-selectable" data-base-target="_next">
     <thead>
     <tr>
-        <th></th>
         <th><?= $this->translate('Host Group') ?></th>
+        <th></th>
         <th><?= $this->translate('Host States') ?></th>
         <th></th>
         <th><?= $this->translate('Service States') ?></th>
@@ -38,10 +40,7 @@ endif ?>
         $filterParams = $filterUrlParams->add($this->virtualGroupKey, $hostGroup->hostgroup_name)->toArray(false);
         ?>
         <tr>
-            <td class="count-col">
-                <span class="badge"><?= $hostGroup->hosts_total ?></span>
-            </td>
-            <th>
+            <td>
                 <?php if ($this->nextVirtualGroupKey): ?>
                     <?=
                     $this->qlink(
@@ -65,7 +64,18 @@ endif ?>
                         ))
                     ) ?>
                 <?php endif; ?>
-            </th>
+            </td>
+            <td class="count-col">
+                <?= $this->qlink(
+                    $hostGroup->hosts_total,
+                    'monitoring/list/hosts',
+                    $filterParams,
+                    array('title' => sprintf(
+                        $this->translate('List all hosts in the group "%s"'),
+                        $hostGroup->hostgroup_alias
+                    ), 'class'    => 'badge')
+                ) ?>
+            </td>
             <td>
                 <?php
                 $stateBadges = new StateBadges();
