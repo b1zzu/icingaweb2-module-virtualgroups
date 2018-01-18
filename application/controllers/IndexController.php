@@ -2,6 +2,7 @@
 
 namespace Icinga\Module\Virtualgroups\Controllers;
 
+use Icinga\Application\Config;
 use Icinga\Web\Url;
 use Icinga\Module\Monitoring\Controller;
 use Icinga\Module\Monitoring\DataView\DataView;
@@ -10,11 +11,7 @@ use Icinga\Module\Virtualgroups\DataView\Virtualgroupsummary;
 
 class IndexController extends Controller
 {
-    private $virtualGroups = array(
-        "L1",
-        "L2",
-        "L3"
-    );
+    private $virtualGroups = array();
 
     private $currentVirtualGroupName;
 
@@ -22,22 +19,21 @@ class IndexController extends Controller
 
     private $nextVirtualGroupKey;
 
-    private $currentVirtualGroupsFilters = array();
-
     public function indexAction()
     {
+        $this->virtualGroups = Config::module('virtualgroups')->getSection('groups')->toArray();
+
         $title = array();
-        foreach ($this->virtualGroups as $name) {
-            $filter = $this->getParam("_host_$name");
+        foreach ($this->virtualGroups as $key => $name) {
+            $filter = $this->getParam($key);
             if (isset($filter)) {
-                $title[] = $name;
-                $this->currentVirtualGroupsFilters["_host_$name"] = $filter;
+                $title[] = $filter;
             } else if (!isset($this->currentVirtualGroupName)) {
                 $title[] = $name;
                 $this->currentVirtualGroupName = $name;
-                $this->currentVirtualGroupKey = sprintf("_host_%s", $this->currentVirtualGroupName);
+                $this->currentVirtualGroupKey = $key;
             } else if (!isset($this->nextVirtualGroupKey)) {
-                $this->nextVirtualGroupKey = sprintf("_host_%s", $name);
+                $this->nextVirtualGroupKey = $key;
             }
         }
 
