@@ -18,8 +18,8 @@ class VirtualgroupsummaryQuery extends IdoQuery
      */
     protected $columnMap = array(
         'hoststatussummary' => array(
-            'hostgroup'                                     => 'hostgroup COLLATE latin1_general_ci',
-            'hostgroup_alias'                               => 'hostgroup_alias COLLATE latin1_general_ci',
+            'hostgroup'                                     => 'hostgroup',
+            'hostgroup_alias'                               => 'hostgroup_alias',
             'hostgroup_name'                                => 'hostgroup_name',
             'hosts_down'                                    => 'SUM(CASE WHEN object_type = \'host\' AND state = 1 THEN 1 ELSE 0 END)',
             'hosts_down_handled'                            => 'SUM(CASE WHEN object_type = \'host\' AND state = 1 AND handled != 0 THEN 1 ELSE 0 END)',
