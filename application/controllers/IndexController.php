@@ -91,6 +91,11 @@ class IndexController extends Controller
         $this->view->hostGroups = $hostGroups;
         $this->view->virtualGroupKey = $this->currentVirtualGroupKey;
         $this->view->nextVirtualGroupKey = $this->nextVirtualGroupKey;
+
+        // do not use getUrlParams of Filter object that urlencodes params
+        // we need raw values so we use parse_str instead
+        parse_str($this->view->filterEditor->getFilter()->toQueryString(), $paramsDecoded);
+        $this->view->paramsDecoded = $paramsDecoded;
     }
 
     /**
