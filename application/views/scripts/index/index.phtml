@@ -31,11 +31,11 @@ endif ?>
 <table class="common-table table-row-selectable" data-base-target="_next">
     <thead>
     <tr>
-        <th><?= $this->translate('Host Group') ?></th>
+        <th><?= $this->translate('Group Name') ?></th>
         <th><?= $this->translate('All Hosts') ?></th>
-        <th><?= $this->translate('Host States') ?></th>
+        <th><?= $this->translate('Hosts by state') ?></th>
         <th><?= $this->translate('All Services') ?></th>
-        <th><?= $this->translate('Service States') ?></th>
+        <th><?= $this->translate('Services by state') ?></th>
     </tr>
     </thead>
     <tbody>
@@ -75,7 +75,7 @@ endif ?>
                     ) ?>
                 <?php endif; ?>
             </td>
-            <td class="count-col">
+            <td>
                 <?= $this->qlink(
                     $hostGroup->hosts_total,
                     'monitoring/list/hosts',
@@ -174,7 +174,7 @@ endif ?>
                 echo $stateBadges->render();
                 ?>
             </td>
-            <td class="count-col">
+            <td>
                 <?= $this->qlink(
                     $hostGroup->services_total,
                     'monitoring/list/services',
