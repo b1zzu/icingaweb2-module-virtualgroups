@@ -31,19 +31,21 @@ endif ?>
 <table class="common-table table-row-selectable" data-base-target="_next">
     <thead>
     <tr>
-        <th><?= $this->translate('Host Group') ?></th>
-        <th></th>
-        <th><?= $this->translate('Host States') ?></th>
-        <th></th>
-        <th><?= $this->translate('Service States') ?></th>
+        <th><?= $this->translate('Group Name') ?></th>
+        <th><?= $this->translate('All Hosts') ?></th>
+        <th><?= $this->translate('Hosts by state') ?></th>
+        <th><?= $this->translate('All Services') ?></th>
+        <th><?= $this->translate('Services by state') ?></th>
     </tr>
     </thead>
     <tbody>
     <?php
-    /* @var $filterUrlParams \Icinga\Web\UrlParams */
-    $filterUrlParams = $this->filterEditor->getFilter()->getUrlParams();
+
     foreach ($hostGroups->peekAhead($this->compact) as $hostGroup):
-        $filterParams = $filterUrlParams->add($this->virtualGroupKey, $hostGroup->hostgroup_name)->toArray(false);
+
+        // add new filter to params into links
+        $this->paramsDecoded[$this->virtualGroupKey] = $hostGroup->hostgroup_name;
+
         ?>
         <tr>
             <td>
@@ -52,34 +54,37 @@ endif ?>
                     $this->qlink(
                         $hostGroup->hostgroup_alias,
                         'virtualgroups',
-                        $filterParams,
+                        $this->paramsDecoded,
                         array('title' => sprintf(
                             $this->translate('List all hosts in the group "%s"'),
                             $hostGroup->hostgroup_alias
-                        ))
+                        )),
+                        false
                     ) ?>
                 <?php else: ?>
                     <?=
                     $this->qlink(
                         $hostGroup->hostgroup_alias,
                         'monitoring/list/hosts',
-                        $filterParams,
+                        $this->paramsDecoded,
                         array('title' => sprintf(
                             $this->translate('List all hosts in the group "%s"'),
                             $hostGroup->hostgroup_alias
-                        ))
+                        )),
+                        false
                     ) ?>
                 <?php endif; ?>
             </td>
-            <td class="count-col">
+            <td>
                 <?= $this->qlink(
                     $hostGroup->hosts_total,
                     'monitoring/list/hosts',
-                    $filterParams,
+                    $this->paramsDecoded,
                     array('title' => sprintf(
                         $this->translate('List all hosts in the group "%s"'),
                         $hostGroup->hostgroup_alias
-                    ), 'class'    => 'badge')
+                    ), 'class'    => 'badge'),
+                    false
                 ) ?>
             </td>
             <td>
@@ -169,11 +174,11 @@ endif ?>
                 echo $stateBadges->render();
                 ?>
             </td>
-            <td class="count-col">
+            <td>
                 <?= $this->qlink(
                     $hostGroup->services_total,
                     'monitoring/list/services',
-                    $filterParams,
+                    $this->paramsDecoded,
                     array('title' => sprintf(
                         $this->translate('List all services of all hosts in host group "%s"'),
                         $hostGroup->hostgroup_alias
